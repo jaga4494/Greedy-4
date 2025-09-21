@@ -1,6 +1,11 @@
 // https://leetcode.ca/2018-10-20-1055-Shortest-Way-to-Form-String/
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,7 +28,62 @@ Output: -1
 Explanation: The target string cannot be constructed from the subsequences of source
  */
 class Solution {
+
+    // Better way - TC: O(m logk) - k is avg freq of each char in s. SC: O(m)
     public static int shortestWay(String source, String target) {
+        if (target == null || target.length() == 0) {
+            return 0;
+        }
+
+        Map<Character, List<Integer>> map = new HashMap<>();
+        int m = source.length();
+        int n = target.length();
+
+        for (int i = 0; i < m; ++i) {
+            char c = source.charAt(i);
+            if (!map.containsKey(c)) {
+                map.put(c, new ArrayList<>());
+            }
+            List<Integer> l = map.get(c);
+            l.add(i);
+            map.put(c, l);
+        }
+
+        int sp = 0;
+        int tp = 0;
+
+        int ans = 1;
+        for (int i = 0; i < n; ++i) {
+            char c = target.charAt(i);
+
+            if (!map.containsKey(c)) {
+                return -1;
+            }
+
+            List<Integer> list = map.get(c);
+            int index = Collections.binarySearch(list, sp);
+
+            if (index < 0) {
+                index = -(index + 1);
+            }
+
+            // means the char is not found in any index >= sp. So have to search from start.
+            if (index == list.size()) { 
+                sp = 0;
+                ++ans;
+            } else {
+                sp = list.get(index);
+                sp++;
+                tp++;
+            }
+
+        }
+
+        return ans;
+    }
+
+    // TC: O(mn) SC: O(m)
+    public static int shortestWay1(String source, String target) {
         if (target == null || target.length() == 0) {
             return 0;
         }
@@ -67,7 +127,8 @@ class Solution {
 
         return -1;
     }
-
+    
+ 
     public static void main(String[] args) {
         System.out.println(shortestWay("abc", "abcbc"));
         System.out.println(shortestWay("abc", "acdbc"));
